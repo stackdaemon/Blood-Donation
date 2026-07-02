@@ -1,0 +1,170 @@
+{
+  "users": [
+    {
+      "name": "Super Admin",
+      "email": "admin@blood.com",
+      "password": "$2a$10$MYWlVMFFlI4be.ms6a.oOeYTVa63dI.I0oyEU3DKCIZzNvoF4uLNG",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
+      "bloodGroup": "A+",
+      "district": "Dhaka",
+      "upazila": "Mirpur",
+      "role": "admin",
+      "status": "active",
+      "_id": "m54n3d7",
+      "createdAt": "2026-07-02T03:57:46.832Z",
+      "updatedAt": "2026-07-02T03:57:46.833Z"
+    },
+    {
+      "name": "Rashed Volunteer",
+      "email": "volunteer@blood.com",
+      "password": "$2a$10$opI5Bl1QI/AZYDPa.7N8LuuU8p37A/6fMpum2gYui23GrgprAkxt6",
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
+      "bloodGroup": "B+",
+      "district": "Chittagong",
+      "upazila": "Hathazari",
+      "role": "volunteer",
+      "status": "active",
+      "_id": "pfyrbi7",
+      "createdAt": "2026-07-02T03:57:46.889Z",
+      "updatedAt": "2026-07-02T03:57:46.889Z"
+    },
+    {
+      "name": "Rahim Donor",
+      "email": "donor1@blood.com",
+      "password": "$2a$10$PsnVzorQ8dqXv4v.kpLF4.kTds0OOPyox5tFvvUfmL60auBnlypVG",
+      "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150",
+      "bloodGroup": "O+",
+      "district": "Dhaka",
+      "upazila": "Gulshan",
+      "role": "donor",
+      "status": "active",
+      "_id": "8vr70h8",
+      "createdAt": "2026-07-02T03:57:46.945Z",
+      "updatedAt": "2026-07-02T03:57:46.945Z"
+    },
+    {
+      "name": "Karim Blocked",
+      "email": "donor2@blood.com",
+      "password": "$2a$10$0B9k3G1vIZawXKOzL22w/e1T91WXcDO4mOI6BjqMhmebbs6EgaQKK",
+      "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150",
+      "bloodGroup": "AB-",
+      "district": "Sylhet",
+      "upazila": "Beanibazar",
+      "role": "donor",
+      "status": "blocked",
+      "_id": "zttbnec",
+      "createdAt": "2026-07-02T03:57:47.002Z",
+      "updatedAt": "2026-07-02T03:57:47.002Z"
+    },
+    {
+      "name": "Test Donor",
+      "email": "testdonor1@example.com",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200",
+      "bloodGroup": "A+",
+      "district": "Dhaka",
+      "upazila": "Mirpur",
+      "password": "$2a$10$2aa9vfJWaQuuui/ni5wv.uNigVDa6SVRtT5Qc/sCHVmBYiZiuylRC",
+      "_id": "4m0488m",
+      "createdAt": "2026-07-02T04:45:20.637Z",
+      "updatedAt": "2026-07-02T04:45:20.637Z"
+    }
+  ],
+  "donationrequests": [
+    {
+      "requesterName": "Rahim Donor",
+      "requesterEmail": "donor1@blood.com",
+      "recipientName": "Abul Kalam",
+      "recipientDistrict": "Dhaka",
+      "recipientUpazila": "Gulshan",
+      "hospitalName": "United Hospital",
+      "fullAddress": "Plot 15, Road 71, Gulshan 2",
+      "bloodGroup": "O+",
+      "donationDate": "2026-07-15",
+      "donationTime": "10:30",
+      "requestMessage": "Urgent blood donor needed for bypass surgery.",
+      "status": "pending",
+      "_id": "5oxv5ek",
+      "createdAt": "2026-07-02T03:57:47.003Z",
+      "updatedAt": "2026-07-02T03:57:47.003Z"
+    },
+    {
+      "requesterName": "Rahim Donor",
+      "requesterEmail": "donor1@blood.com",
+      "recipientName": "Amena Begum",
+      "recipientDistrict": "Dhaka",
+      "recipientUpazila": "Mirpur",
+      "hospitalName": "National Heart Foundation",
+      "fullAddress": "Mirpur 2, Dhaka",
+      "bloodGroup": "A+",
+      "donationDate": "2026-07-18",
+      "donationTime": "14:00",
+      "requestMessage": "Looking for A+ blood donor for emergency surgery.",
+      "status": "inprogress",
+      "donorInfo": {
+        "name": "Super Admin",
+        "email": "admin@blood.com"
+      },
+      "_id": "mopoi8t",
+      "createdAt": "2026-07-02T03:57:47.004Z",
+      "updatedAt": "2026-07-02T03:57:47.004Z"
+    },
+    {
+      "requesterName": "Rahim Donor",
+      "requesterEmail": "donor1@blood.com",
+      "recipientName": "Sajid Islam",
+      "recipientDistrict": "Chittagong",
+      "recipientUpazila": "Hathazari",
+      "hospitalName": "Chittagong Medical College",
+      "fullAddress": "KB Fazlul Qader Rd, Chattogram",
+      "bloodGroup": "B+",
+      "donationDate": "2026-06-10",
+      "donationTime": "09:00",
+      "requestMessage": "Donor matched, blood successfully transfused. Thank you.",
+      "status": "done",
+      "donorInfo": {
+        "name": "Rashed Volunteer",
+        "email": "volunteer@blood.com"
+      },
+      "_id": "cmy9s27",
+      "createdAt": "2026-07-02T03:57:47.005Z",
+      "updatedAt": "2026-07-02T03:57:47.005Z"
+    },
+    {
+      "requesterName": "Sadia Jahan",
+      "requesterEmail": "sadia@example.com",
+      "recipientName": "Karim Islam",
+      "recipientDistrict": "Rajshahi",
+      "recipientUpazila": "Paba",
+      "hospitalName": "Rajshahi Medical College Hospital",
+      "fullAddress": "Laxmipur, Rajshahi",
+      "bloodGroup": "AB-",
+      "donationDate": "2026-07-25",
+      "donationTime": "11:00",
+      "requestMessage": "Patient needs platelet transfusion urgently.",
+      "status": "pending",
+      "_id": "qd8c65v",
+      "createdAt": "2026-07-02T03:57:47.005Z",
+      "updatedAt": "2026-07-02T03:57:47.005Z"
+    }
+  ],
+  "fundings": [
+    {
+      "donorName": "Rahim Donor",
+      "donorEmail": "donor1@blood.com",
+      "amount": 50,
+      "paymentIntentId": "pi_mock_111111",
+      "createdAt": "2026-07-02T03:57:47.006Z",
+      "_id": "ph2uzmb",
+      "updatedAt": "2026-07-02T03:57:47.006Z"
+    },
+    {
+      "donorName": "Super Admin",
+      "donorEmail": "admin@blood.com",
+      "amount": 250,
+      "paymentIntentId": "pi_mock_222222",
+      "createdAt": "2026-07-02T03:57:47.006Z",
+      "_id": "gkupj77",
+      "updatedAt": "2026-07-02T03:57:47.006Z"
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 const express = require('express');
 const Funding = require('../models/Funding');
+const User = require('../models/User');
 const { verifyToken, checkNotBlocked } = require('../middleware/auth');
 const router = express.Router();
 
@@ -67,14 +68,57 @@ router.post('/create-checkout-session', verifyToken, checkNotBlocked, async (req
   }
 });
 
+// @route   POST /api/funding/create-payment-intent
+// @desc    Create Stripe PaymentIntent
+// @access  Private (Active users only)
+router.post('/create-payment-intent', verifyToken, checkNotBlocked, async (req, res) => {
+  const { amount, currency } = req.body;
+
+  if (!amount || isNaN(amount) || amount <= 0) {
+    return res.status(400).json({ message: 'Invalid donation amount.' });
+  }
+
+  const selectedCurrency = currency || 'usd';
+
+  try {
+    if (stripe) {
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // in cents
+        currency: selectedCurrency,
+        metadata: {
+          userId: req.user._id.toString(),
+          donorName: req.user.name,
+          donorEmail: req.user.email,
+        },
+      });
+
+      res.json({
+        clientSecret: paymentIntent.client_secret,
+        mode: 'live',
+      });
+    } else {
+      // Mock mode fallback for local development
+      res.json({
+        clientSecret: `pi_mock_secret_${Math.random().toString(36).substring(2, 10)}`,
+        mode: 'mock',
+      });
+    }
+  } catch (error) {
+    console.error('Stripe Payment Intent error:', error);
+    res.status(500).json({ message: 'Failed to initiate payment intent.' });
+  }
+});
+
 // @route   POST /api/funding/log-mock
 // @desc    Log mock donation details (Fallback helper for local testing when Stripe is not set up)
 // @access  Private (Active users only)
 router.post('/log-mock', verifyToken, checkNotBlocked, async (req, res) => {
-  const { amount } = req.body;
-  if (!amount || isNaN(amount)) {
+  const { amount, currency } = req.body;
+  if (!amount || isNaN(amount) || amount <= 0) {
     return res.status(400).json({ message: 'Invalid mock amount.' });
   }
+
+  const selectedCurrency = currency || 'usd';
 
   try {
     const mockIntentId = `pi_mock_${Math.random().toString(36).substring(2, 10)}`;
@@ -82,8 +126,26 @@ router.post('/log-mock', verifyToken, checkNotBlocked, async (req, res) => {
       donorName: req.user.name,
       donorEmail: req.user.email,
       amount: Number(amount),
+      currency: selectedCurrency,
       paymentIntentId: mockIntentId,
     });
+
+    // Update User schema to track donation history and payment status
+    await User.findByIdAndUpdate(req.user._id, {
+      $push: {
+        donationHistory: {
+          amount: Number(amount),
+          currency: selectedCurrency,
+          paymentIntentId: mockIntentId,
+          status: 'succeeded',
+          createdAt: new Date(),
+        }
+      },
+      $set: {
+        paymentStatus: 'succeeded'
+      }
+    });
+
     res.status(201).json(funding);
   } catch (error) {
     console.error('Mock donation save error:', error);
@@ -116,7 +178,58 @@ router.post('/webhook', async (req, res) => {
   }
 
   // Handle successful payments
-  if (event.type === 'checkout.session.completed') {
+  if (event.type === 'payment_intent.succeeded') {
+    const paymentIntent = event.data.object;
+    
+    const amount = paymentIntent.amount / 100;
+    const currency = paymentIntent.currency;
+    const paymentIntentId = paymentIntent.id;
+    const userId = paymentIntent.metadata?.userId;
+    const donorName = paymentIntent.metadata?.donorName || 'Anonymous Donor';
+    const donorEmail = paymentIntent.metadata?.donorEmail || paymentIntent.receipt_email || 'Anonymous Donor';
+
+    try {
+      // 1. Create Funding document if not already exists
+      const existingFunding = await Funding.findOne({ paymentIntentId });
+      if (!existingFunding) {
+        await Funding.create({
+          donorName,
+          donorEmail,
+          amount,
+          currency,
+          paymentIntentId,
+        });
+        console.log(`Saved ${currency.toUpperCase()} ${amount} donation from ${donorEmail} to MongoDB via Stripe Webhook.`);
+      }
+
+      // 2. Update user document
+      if (userId) {
+        const user = await User.findById(userId);
+        if (user) {
+          const alreadyLogged = user.donationHistory?.some(item => item.paymentIntentId === paymentIntentId);
+          if (!alreadyLogged) {
+            await User.findByIdAndUpdate(userId, {
+              $push: {
+                donationHistory: {
+                  amount,
+                  currency,
+                  paymentIntentId,
+                  status: 'succeeded',
+                  createdAt: new Date(),
+                }
+              },
+              $set: {
+                paymentStatus: 'succeeded'
+              }
+            });
+            console.log(`Successfully updated user ${userId} donation history and paymentStatus.`);
+          }
+        }
+      }
+    } catch (dbErr) {
+      console.error('Webhook failed to write funding record to DB:', dbErr);
+    }
+  } else if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     
     const amount = session.amount_total / 100;
@@ -125,13 +238,17 @@ router.post('/webhook', async (req, res) => {
     const donorEmail = session.metadata?.donorEmail || session.customer_email;
 
     try {
-      await Funding.create({
-        donorName,
-        donorEmail,
-        amount,
-        paymentIntentId,
-      });
-      console.log(`Successfully saved $${amount} donation from ${donorEmail} to MongoDB via Stripe Webhook.`);
+      const existingFunding = await Funding.findOne({ paymentIntentId });
+      if (!existingFunding) {
+        await Funding.create({
+          donorName,
+          donorEmail,
+          amount,
+          currency: session.currency || 'usd',
+          paymentIntentId,
+        });
+        console.log(`Successfully saved ${session.currency?.toUpperCase()} ${amount} donation from ${donorEmail} to MongoDB via Stripe Webhook.`);
+      }
     } catch (dbErr) {
       console.error('Webhook failed to write funding record to DB:', dbErr);
     }

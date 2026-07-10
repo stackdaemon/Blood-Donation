@@ -17,6 +17,7 @@ import {
   AlertCircle,
   HelpCircle
 } from 'lucide-react';
+import { showSuccessToast, showErrorToast } from '../utils/alert';
 
 const RequestDetails = () => {
   const { id } = useParams();
@@ -29,6 +30,7 @@ const RequestDetails = () => {
   const [actionLoading, setActionLoading] = useState(false);
 
   const fetchRequestDetails = async () => {
+    setLoading(true);
     try {
       const response = await api.get(`/donations/${id}`);
       setRequest(response.data);
@@ -48,11 +50,12 @@ const RequestDetails = () => {
     setActionLoading(true);
     try {
       await api.patch(`/donations/${id}/donate`);
+      showSuccessToast('Thank you! Your donation response has been submitted.');
       setModalOpen(false);
       // Refresh details to update state
       await fetchRequestDetails();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to submit donation response.');
+      showErrorToast(err.response?.data?.message || 'Failed to submit donation response.');
     } finally {
       setActionLoading(false);
     }

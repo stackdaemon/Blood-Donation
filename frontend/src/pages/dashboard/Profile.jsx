@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { LOCATION_DATA } from '../Register';
 import { User, Mail, MapPin, Droplet, Edit3, Save, CheckCircle, Image } from 'lucide-react';
 import axios from 'axios';
+import { showSuccessToast, showErrorToast } from '../../utils/alert';
 
 const Profile = () => {
   const { user, updateProfile } = useAuth();
@@ -36,21 +37,24 @@ const Profile = () => {
     }
   };
 
-  const uploadToImgBB = async (file) => {
-    const apiKey = import.meta.env.VITE_IMGBB_API_KEY;
-    if (!apiKey || apiKey === 'placeholder' || apiKey.startsWith('placeholder_')) {
-      console.warn('VITE_IMGBB_API_KEY is placeholder. Skipping file upload.');
+  const uploadToCloudinary = async (file) => {
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET?.replace(/['"]/g, '').trim();
+
+    if (!cloudName || !uploadPreset || cloudName === 'placeholder' || uploadPreset === 'placeholder') {
+      console.warn('Cloudinary not configured. Skipping file upload.');
       return user.avatar; // retain current avatar
     }
 
     const form = new FormData();
-    form.append('image', file);
+    form.append('file', file);
+    form.append('upload_preset', uploadPreset);
 
     try {
-      const res = await axios.post(`https://api.imgbb.com/1/upload?key=${apiKey}`, form);
-      return res.data.data.url;
+      const res = await axios.post(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, form);
+      return res.data.secure_url;
     } catch (err) {
-      console.error('ImgBB upload error:', err);
+      console.error('Cloudinary upload error:', err);
       return user.avatar;
     }
   };
@@ -64,7 +68,7 @@ const Profile = () => {
     try {
       let avatarUrl = formData.avatar;
       if (imageFile) {
-        avatarUrl = await uploadToImgBB(imageFile);
+        avatarUrl = await uploadToCloudinary(imageFile);
       }
 
       await updateProfile({
@@ -76,11 +80,14 @@ const Profile = () => {
       });
 
       setSuccessMsg('Profile updated successfully!');
+      showSuccessToast('Profile updated successfully!');
       setEditMode(false);
       setImageFile(null);
       setTimeout(() => setSuccessMsg(''), 3000);
     } catch (err) {
-      setErrorMsg(err.message || 'Failed to update profile.');
+      const msg = err.message || 'Failed to update profile.';
+      setErrorMsg(msg);
+      showErrorToast(msg);
     } finally {
       setLoading(false);
     }

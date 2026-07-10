@@ -34,6 +34,10 @@ async function startServer() {
   app.use('/api/users', userRoutes);
   app.use('/api/donations', donationRoutes);
   app.use('/api/funding', fundingRoutes);
+  app.use('/api/create-payment-intent', (req, res, next) => {
+    req.url = '/create-payment-intent';
+    next();
+  }, fundingRoutes);
 
   // Health check endpoint
   app.get('/api/health', (req, res) => {

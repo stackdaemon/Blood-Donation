@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { LogIn, Mail, Key } from 'lucide-react';
+import { showSuccessToast, showErrorToast } from '../utils/alert';
 
 const Login = () => {
   const { login } = useAuth();
@@ -22,15 +23,18 @@ const Login = () => {
     setErrorMsg('');
     if (!email || !password) {
       setErrorMsg('Please enter both email and password.');
+      showErrorToast('Please enter both email and password.');
       return;
     }
 
     setLoading(true);
     try {
       await login(email, password);
+      showSuccessToast('Welcome back! Login successful.');
       navigate(from, { replace: true });
     } catch (err) {
       setErrorMsg(err.message || 'Invalid email or password.');
+      showErrorToast(err.message || 'Invalid email or password.');
     } finally {
       setLoading(false);
     }

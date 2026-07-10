@@ -22,16 +22,20 @@ import {
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { LOCATION_DATA } from '../Register';
+import { confirmDialog, showSuccessToast, showErrorToast } from '../../utils/alert';
 
 const DashboardHome = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  const isStaff = user && (user.role === 'admin' || user.role === 'volunteer');
+
   const [stats, setStats] = useState(null);
   const [recentRequests, setRecentRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
 
-  // Edit Modal State
+  // Edit Modal state
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingRequest, setEditingRequest] = useState(null);
   const [editForm, setEditForm] = useState({
@@ -40,45 +44,44 @@ const DashboardHome = () => {
     recipientUpazila: '',
     hospitalName: '',
     fullAddress: '',
-    bloodGroup: '',
+    bloodGroup: 'A+',
     donationDate: '',
     donationTime: '',
     requestMessage: ''
   });
 
-  const isStaff = user && (user.role === 'admin' || user.role === 'volunteer');
-
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
       if (isStaff) {
-        // Fetch stats for Admin / Volunteer
         const response = await api.get('/users/stats');
         setStats(response.data);
       } else {
-        // Fetch recent requests for Donor
         const response = await api.get('/donations/recent');
         setRecentRequests(response.data);
       }
     } catch (err) {
-      console.error('Failed to load dashboard metrics:', err);
+      console.error('Failed to load dashboard data:', err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchDashboardData();
-  }, [user.role]);
+    if (user) {
+      fetchDashboardData();
+    }
+  }, [user]);
 
-  // Action: Change status (pending -> inprogress, inprogress -> done/canceled)
+  // Action: Status change
   const handleStatusChange = async (requestId, newStatus) => {
     setActionLoading(true);
     try {
       await api.patch(`/donations/${requestId}/status`, { status: newStatus });
+      showSuccessToast(`Request status updated to ${newStatus}.`);
       fetchDashboardData();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to update request status.');
+      showErrorToast(err.response?.data?.message || 'Failed to update request status.');
     } finally {
       setActionLoading(false);
     }
@@ -86,15 +89,21 @@ const DashboardHome = () => {
 
   // Action: Delete request
   const handleDeleteRequest = async (requestId) => {
-    if (!window.confirm('Are you sure you want to delete this donation request? This cannot be undone.')) {
-      return;
-    }
+    const confirmed = await confirmDialog({
+      title: 'Delete Request',
+      text: 'Are you sure you want to delete this donation request? This cannot be undone.',
+      confirmButtonText: 'Delete Request',
+      danger: true
+    });
+    if (!confirmed) return;
+
     setActionLoading(true);
     try {
       await api.delete(`/donations/${requestId}`);
+      showSuccessToast('Donation request deleted successfully.');
       fetchDashboardData();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to delete request.');
+      showErrorToast(err.response?.data?.message || 'Failed to delete request.');
     } finally {
       setActionLoading(false);
     }
@@ -133,10 +142,11 @@ const DashboardHome = () => {
     setActionLoading(true);
     try {
       await api.put(`/donations/${editingRequest._id}`, editForm);
+      showSuccessToast('Donation request updated successfully!');
       setEditModalOpen(false);
       fetchDashboardData();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to update donation request details.');
+      showErrorToast(err.response?.data?.message || 'Failed to update donation request details.');
     } finally {
       setActionLoading(false);
     }
@@ -152,9 +162,9 @@ const DashboardHome = () => {
 
   // Chart styling options
   const chartData = stats ? [
-    { name: 'Users', count: stats.totalUsers, color: '#e11d48' },
-    { name: 'Requests', count: stats.totalDonationRequests, color: '#f43f5e' },
-    { name: 'Funding ($)', count: stats.totalFunding, color: '#10b981' }
+    { name: 'Users', count: stats.totalUsers || 0, color: '#e11d48' },
+    { name: 'Requests', count: stats.totalDonationRequests || 0, color: '#f43f5e' },
+    { name: 'Funding ($)', count: stats.totalFunding || 0, color: '#10b981' }
   ] : [];
 
   return (
@@ -164,13 +174,13 @@ const DashboardHome = () => {
         <div className="absolute top-0 right-0 -mt-8 -mr-8 w-60 h-60 bg-rose-500/10 rounded-full blur-2xl pointer-events-none"></div>
         <div className="relative space-y-2 max-w-xl">
           <span className="text-[10px] bg-rose-500 text-white font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-            {user.role} workspace
+            {user?.role} workspace
           </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Welcome back, {user.name}!</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Welcome back, {user?.name}!</h1>
           <p className="text-slate-400 text-xs sm:text-sm">
-            {user.role === 'donor' && 'Create requests, view donation responses, and track your history in real time.'}
-            {user.role === 'volunteer' && 'Review matching requests and coordinate donations in your assigned area.'}
-            {user.role === 'admin' && 'Monitor total users, donation metrics, Stripe funding records, and manage settings.'}
+            {user?.role === 'donor' && 'Create requests, view donation responses, and track your history in real time.'}
+            {user?.role === 'volunteer' && 'Review matching requests and coordinate donations in your assigned area.'}
+            {user?.role === 'admin' && 'Monitor total users, donation metrics, Stripe funding records, and manage settings.'}
           </p>
         </div>
       </div>
@@ -186,7 +196,7 @@ const DashboardHome = () => {
               </div>
               <div className="space-y-0.5">
                 <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Users</h4>
-                <p className="text-2xl font-extrabold text-slate-900">{stats.totalUsers}</p>
+                <p className="text-2xl font-extrabold text-slate-900">{stats.totalUsers || 0}</p>
               </div>
             </div>
 
@@ -197,7 +207,7 @@ const DashboardHome = () => {
               </div>
               <div className="space-y-0.5">
                 <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Funding</h4>
-                <p className="text-2xl font-extrabold text-slate-900">${stats.totalFunding.toFixed(2)}</p>
+                <p className="text-2xl font-extrabold text-slate-900">${(stats.totalFunding || 0).toFixed(2)}</p>
               </div>
             </div>
 

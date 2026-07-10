@@ -17,6 +17,11 @@ const fundingSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    currency: {
+      type: String,
+      required: true,
+      default: 'usd',
+    },
     paymentIntentId: {
       type: String,
       required: true,

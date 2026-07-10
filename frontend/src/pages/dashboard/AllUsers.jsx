@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth, api } from '../../context/AuthContext';
 import { Shield, ShieldAlert, User, ShieldCheck, Mail, Lock, Unlock, Inbox } from 'lucide-react';
+import { confirmDialog, showSuccessToast, showErrorToast } from '../../utils/alert';
 
 const AllUsers = () => {
   const { user: currentUser } = useAuth();
@@ -26,27 +27,42 @@ const AllUsers = () => {
 
   const handleStatusToggle = async (userId, currentStatus) => {
     const newStatus = currentStatus === 'active' ? 'blocked' : 'active';
+    const confirmed = await confirmDialog({
+      title: `${newStatus === 'blocked' ? 'Block' : 'Unblock'} User`,
+      text: `Are you sure you want to ${newStatus === 'blocked' ? 'block' : 'unblock'} this account?`,
+      confirmButtonText: newStatus === 'blocked' ? 'Yes, Block User' : 'Yes, Unblock User',
+      danger: newStatus === 'blocked'
+    });
+    if (!confirmed) return;
+
     setActionLoading(true);
     try {
       await api.patch(`/users/${userId}/status`, { status: newStatus });
+      showSuccessToast(`User account is now ${newStatus}.`);
       fetchUsers();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to update user status.');
+      showErrorToast(err.response?.data?.message || 'Failed to update user status.');
     } finally {
       setActionLoading(false);
     }
   };
 
   const handleRoleChange = async (userId, newRole) => {
-    if (!window.confirm(`Are you sure you want to change this user's role to ${newRole}?`)) {
-      return;
-    }
+    const confirmed = await confirmDialog({
+      title: 'Change User Role',
+      text: `Are you sure you want to change this user's role to "${newRole}"?`,
+      confirmButtonText: `Make ${newRole}`,
+      danger: false
+    });
+    if (!confirmed) return;
+
     setActionLoading(true);
     try {
       await api.patch(`/users/${userId}/role`, { role: newRole });
+      showSuccessToast(`User role successfully changed to ${newRole}!`);
       fetchUsers();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to update user role.');
+      showErrorToast(err.response?.data?.message || 'Failed to update user role.');
     } finally {
       setActionLoading(false);
     }

@@ -46,6 +46,20 @@ const userSchema = new mongoose.Schema(
       enum: ['active', 'blocked'],
       default: 'active',
     },
+    donationHistory: [
+      {
+        amount: { type: Number, required: true },
+        currency: { type: String, required: true },
+        paymentIntentId: { type: String, required: true },
+        status: { type: String, required: true, default: 'succeeded' },
+        createdAt: { type: Date, default: Date.now }
+      }
+    ],
+    paymentStatus: {
+      type: String,
+      enum: ['succeeded', 'pending', 'failed', 'none'],
+      default: 'none',
+    },
   },
   {
     timestamps: true,

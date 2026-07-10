@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import { Toaster } from './utils/alert';
 
 // Public Pages
 import Home from './pages/Home';
@@ -26,6 +27,7 @@ import AllDonationRequests from './pages/dashboard/AllDonationRequests';
 function App() {
   return (
     <AuthProvider>
+      <Toaster position="top-right" />
       <Router>
         <Routes>
           {/* Public Routes */}

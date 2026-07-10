@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   Droplet
 } from 'lucide-react';
+import { showSuccessToast, showErrorToast } from '../../utils/alert';
 
 const CreateDonationRequest = () => {
   const { user } = useAuth();
@@ -75,6 +76,7 @@ const CreateDonationRequest = () => {
       !requestMessage
     ) {
       setErrorMsg('Please fill in all donation details.');
+      showErrorToast('Please fill in all donation details.');
       return;
     }
 
@@ -82,12 +84,15 @@ const CreateDonationRequest = () => {
 
     try {
       await api.post('/donations', formData);
+      showSuccessToast('Donation request created successfully!');
       setSuccessMsg('Donation request created successfully! Redirecting...');
       setTimeout(() => {
         navigate('/dashboard');
-      }, 1500);
+      }, 1200);
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Failed to submit request.');
+      const msg = err.response?.data?.message || 'Failed to submit request.';
+      setErrorMsg(msg);
+      showErrorToast(msg);
     } finally {
       setLoading(false);
     }

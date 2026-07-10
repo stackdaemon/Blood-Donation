@@ -18,12 +18,13 @@ import {
   FileText
 } from 'lucide-react';
 import { LOCATION_DATA } from '../Register';
+import { confirmDialog, showSuccessToast, showErrorToast } from '../../utils/alert';
 
 const MyDonationRequests = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [requests, setRequests] = useState([]);
-  const [filterStatus, setFilterStatus] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -38,7 +39,7 @@ const MyDonationRequests = () => {
     recipientUpazila: '',
     hospitalName: '',
     fullAddress: '',
-    bloodGroup: '',
+    bloodGroup: 'A+',
     donationDate: '',
     donationTime: '',
     requestMessage: ''
@@ -49,8 +50,8 @@ const MyDonationRequests = () => {
     try {
       const response = await api.get('/donations', {
         params: {
-          requesterEmail: user.email,
-          status: filterStatus || undefined,
+          requesterEmail: user?.email,
+          status: statusFilter === 'all' ? undefined : statusFilter,
           page,
           limit: 5 // Paginated at 5 rows per page
         }
@@ -58,7 +59,7 @@ const MyDonationRequests = () => {
       setRequests(response.data.requests || []);
       setTotalPages(response.data.totalPages || 1);
     } catch (err) {
-      console.error('Failed to load my requests:', err);
+      console.error('Failed to load my donation requests:', err);
     } finally {
       setLoading(false);
     }
@@ -66,16 +67,17 @@ const MyDonationRequests = () => {
 
   useEffect(() => {
     fetchMyRequests();
-  }, [filterStatus, page]);
+  }, [statusFilter, page]);
 
   // Handle status update
   const handleStatusChange = async (requestId, newStatus) => {
     setActionLoading(true);
     try {
       await api.patch(`/donations/${requestId}/status`, { status: newStatus });
+      showSuccessToast(`Request status changed to ${newStatus}.`);
       fetchMyRequests();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to update request status.');
+      showErrorToast(err.response?.data?.message || 'Failed to update request status.');
     } finally {
       setActionLoading(false);
     }
@@ -83,15 +85,21 @@ const MyDonationRequests = () => {
 
   // Handle delete request
   const handleDeleteRequest = async (requestId) => {
-    if (!window.confirm('Are you sure you want to delete this donation request?')) {
-      return;
-    }
+    const confirmed = await confirmDialog({
+      title: 'Delete Request',
+      text: 'Are you sure you want to delete this donation request? This cannot be undone.',
+      confirmButtonText: 'Delete Request',
+      danger: true
+    });
+    if (!confirmed) return;
+
     setActionLoading(true);
     try {
       await api.delete(`/donations/${requestId}`);
+      showSuccessToast('Donation request deleted.');
       fetchMyRequests();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to delete request.');
+      showErrorToast(err.response?.data?.message || 'Failed to delete request.');
     } finally {
       setActionLoading(false);
     }
@@ -130,10 +138,11 @@ const MyDonationRequests = () => {
     setActionLoading(true);
     try {
       await api.put(`/donations/${editingRequest._id}`, editForm);
+      showSuccessToast('Donation request updated successfully!');
       setEditModalOpen(false);
       fetchMyRequests();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to update donation request details.');
+      showErrorToast(err.response?.data?.message || 'Failed to update donation request details.');
     } finally {
       setActionLoading(false);
     }
@@ -164,14 +173,14 @@ const MyDonationRequests = () => {
         </div>
         <div className="flex w-full sm:w-auto items-center space-x-2">
           <select
-            value={filterStatus}
+            value={statusFilter}
             onChange={(e) => {
-              setFilterStatus(e.target.value);
+              setStatusFilter(e.target.value);
               setPage(1); // reset to first page on filter change
             }}
             className="w-full sm:w-48 px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 focus:border-rose-500 focus:bg-white focus:outline-none rounded-xl text-xs font-semibold text-slate-600 cursor-pointer"
           >
-            <option value="">All Requests</option>
+            <option value="all">All Requests</option>
             <option value="pending">Pending</option>
             <option value="inprogress">In Progress</option>
             <option value="done">Done</option>

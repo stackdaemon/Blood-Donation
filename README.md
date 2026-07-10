@@ -68,7 +68,7 @@ The Blood Donation Application is designed to simplify the blood donation proces
 
 ## 🔎 Search System
 
-See search implementation details in [Search.jsx](file:///c:/Projects-2/Blood-donation-sm/frontend/src/pages/Search.jsx). Users can search donors by:
+Users can search donors by:
 
 - Blood Group
 - District
@@ -305,7 +305,7 @@ npm run dev
 
 ---
 
-## 💡 Volunteer
+## Volunteer
 
 - View All Requests
 - Update Donation Status

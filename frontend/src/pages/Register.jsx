@@ -49,10 +49,12 @@ const Register = () => {
     }
   };
 
-  const uploadToImgBB = async (file) => {
-    const apiKey = import.meta.env.VITE_IMGBB_API_KEY;
-    if (!apiKey || apiKey === 'placeholder' || apiKey.startsWith('placeholder_')) {
-      console.warn('VITE_IMGBB_API_KEY not configured. Falling back to default unsplash avatar.');
+  const uploadToCloudinary = async (file) => {
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET?.replace(/['"]/g, '').trim();
+
+    if (!cloudName || !uploadPreset || cloudName === 'placeholder' || uploadPreset === 'placeholder') {
+      console.warn('Cloudinary not configured. Falling back to default unsplash avatar.');
       // Beautiful mock user avatars
       const mockAvatars = [
         'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200',
@@ -64,13 +66,14 @@ const Register = () => {
     }
 
     const form = new FormData();
-    form.append('image', file);
+    form.append('file', file);
+    form.append('upload_preset', uploadPreset);
 
     try {
-      const res = await axios.post(`https://api.imgbb.com/1/upload?key=${apiKey}`, form);
-      return res.data.data.url;
+      const res = await axios.post(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, form);
+      return res.data.secure_url;
     } catch (err) {
-      console.error('ImgBB upload error, using default avatar fallback:', err);
+      console.error('Cloudinary upload error, using default avatar fallback:', err);
       return 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200';
     }
   };
@@ -102,7 +105,7 @@ const Register = () => {
     try {
       let avatarUrl = '';
       if (imageFile) {
-        avatarUrl = await uploadToImgBB(imageFile);
+        avatarUrl = await uploadToCloudinary(imageFile);
       } else {
         avatarUrl = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200'; // fallback default
       }

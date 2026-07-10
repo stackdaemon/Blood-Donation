@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Heart, Search, Users, ShieldAlert, Award, Star, Mail, Phone, MapPin, CheckCircle } from 'lucide-react';
+import { showSuccessToast } from '../utils/alert';
 
 const Home = () => {
   const stats = [
@@ -192,7 +193,7 @@ const Home = () => {
 
           {/* Contact Form Card */}
           <div className="bg-slate-50 border border-slate-100 rounded-3xl p-6 sm:p-8 shadow-inner">
-            <form onSubmit={(e) => { e.preventDefault(); alert("Message sent! We'll reply shortly."); }} className="space-y-4">
+            <form onSubmit={(e) => { e.preventDefault(); showSuccessToast("Message sent! We'll reply shortly."); }} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-slate-500">Name</label>

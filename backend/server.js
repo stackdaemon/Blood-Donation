@@ -46,7 +46,11 @@ async function startServer() {
 
   // React Router refresh fallback fix
   app.get('*', (req, res) => {
-    res.sendFile(path.join(frontendDistPath, 'index.html'));
+    res.sendFile(path.join(frontendDistPath, 'index.html'), (err) => {
+      if (err) {
+        res.json({ message: 'Welcome to the Blood Donation API', status: 'healthy' });
+      }
+    });
   });
 
   // Global Error Handler

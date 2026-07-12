@@ -4,8 +4,10 @@ import axios from 'axios';
 const AuthContext = createContext(null);
 
 export const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-  ? 'http://localhost:5000'
-  : '';
+  ? (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000')
+  : (import.meta.env.VITE_API_BASE_URL && !import.meta.env.VITE_API_BASE_URL.includes('localhost')
+      ? import.meta.env.VITE_API_BASE_URL
+      : 'https://blood-donation-server1.vercel.app');
 
 // Create a custom Axios instance
 export const api = axios.create({

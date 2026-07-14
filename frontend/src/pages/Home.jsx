@@ -2,6 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import Gallery from '../components/Gallery';
+import Testimonials from '../components/Testimonials';
+import FAQ from '../components/FAQ';
 import { Heart, Search, Users, ShieldAlert, Award, Star, Mail, Phone, MapPin, CheckCircle } from 'lucide-react';
 import { showSuccessToast } from '../utils/alert';
 
@@ -159,6 +162,15 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* Gallery Section */}
+      <Gallery />
+
+      {/* Testimonials Section */}
+      <Testimonials />
+
+      {/* FAQ Section */}
+      <FAQ />
 
       {/* Contact Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white border-t border-slate-100">

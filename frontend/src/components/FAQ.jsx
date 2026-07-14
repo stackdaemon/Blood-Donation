@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { HelpCircle, Heart } from 'lucide-react';
 
@@ -30,6 +30,12 @@ const FAQ = () => {
       answer: "Get a good night's sleep, eat a healthy, low-fat meal before your appointment, and drink plenty of water (approx. 500ml) beforehand. Avoid drinking alcohol 24 hours prior to donation and stay hydrated after you finish.",
     },
   ];
+
+  const [openIndex, setOpenIndex] = useState(0);
+
+  const toggleIndex = (index) => {
+    setOpenIndex(openIndex === index ? null : index);
+  };
 
   // Framer Motion variants for scroll-triggered fade in
   const fadeUpVariants = {
@@ -76,18 +82,17 @@ const FAQ = () => {
           {faqs.map((faq, index) => (
             <div
               key={faq.id}
-              className="collapse collapse-plus border border-slate-100 bg-slate-50/50 hover:bg-slate-50 rounded-2xl hover:border-rose-200 transition-all duration-200 shadow-sm"
+              className={`collapse collapse-plus border border-slate-100 bg-slate-50/50 hover:bg-slate-50 rounded-2xl hover:border-rose-200 transition-all duration-200 shadow-sm ${
+                openIndex === index ? 'collapse-open' : 'collapse-close'
+              }`}
             >
-              {/* Radio input handles accordion state (only one open at a time) */}
-              <input
-                type="radio"
-                name="blood-donation-faq"
-                defaultChecked={index === 0}
-                className="peer cursor-pointer"
-              />
-              
               {/* Question Header */}
-              <div className="collapse-title text-base sm:text-lg font-bold text-slate-800 peer-checked:text-rose-600 transition-colors pr-12 py-5 pl-6 sm:pl-8">
+              <div 
+                className={`collapse-title text-base sm:text-lg font-bold cursor-pointer transition-colors pr-12 py-5 pl-6 sm:pl-8 ${
+                  openIndex === index ? 'text-rose-600' : 'text-slate-800'
+                }`}
+                onClick={() => toggleIndex(index)}
+              >
                 {faq.question}
               </div>
 

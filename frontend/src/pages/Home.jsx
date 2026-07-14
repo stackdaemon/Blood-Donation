@@ -187,7 +187,7 @@ const Home = () => {
                 </div>
                 <div>
                   <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Helpline (24/7)</h4>
-                  <p className="text-sm font-bold text-slate-800">+880 1234 567890</p>
+                  <p className="text-sm font-bold text-slate-800">+880 1863431747</p>
                 </div>
               </div>
 
@@ -197,7 +197,17 @@ const Home = () => {
                 </div>
                 <div>
                   <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Email Us</h4>
-                  <p className="text-sm font-bold text-slate-800">support@bloodlink.org</p>
+                  <p className="text-sm font-bold text-slate-800">mdrifathasan5127@gmail.com</p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-3.5">
+                <div className="bg-rose-50 p-2.5 rounded-xl text-rose-500">
+                  <MapPin className="h-5 w-5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Our Location</h4>
+                  <p className="text-sm font-bold text-slate-800">Rajshahi, Bangladesh</p>
                 </div>
               </div>
             </div>
@@ -205,7 +215,7 @@ const Home = () => {
 
           {/* Contact Form Card */}
           <div className="bg-slate-50 border border-slate-100 rounded-3xl p-6 sm:p-8 shadow-inner">
-            <form onSubmit={(e) => { e.preventDefault(); showSuccessToast("Message sent! We'll reply shortly."); }} className="space-y-4">
+            <form onSubmit={(e) => { e.preventDefault(); showSuccessToast("Message sent! We'll reply shortly."); e.target.reset(); }} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-slate-500">Name</label>
